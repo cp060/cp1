@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Get Code'){
+            steps {
+                // get code from repo
+                git 'https://github.com/cp060/cp1.git'
+            }
+        }
+    
+        stage('Build') {
+            steps {
+                echo 'Eip, this is Python mai fren, nothing to comppile!!'
+                echo WORKSPACE
+                bat 'dir'
+            }
+        }
+        
+        // create test stages in parallel
+        stage('Run Tests') {
+            parallel {
+                stage('Unit') {
+                    steps {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {        
+                            bat '''
+                                SET PYTHONPATH=%WORKSPACE%
+                                pytest --junitxml=result-unit.xml test\\unit
+                            '''
+                        }
+                    }
+                }
+                
+                stage('Rest'){
+                    steps {
+                        bat '''
+                            set FLASK_APP=app\\api.py
+                            set FLASK_ENV=development
+                            start flask run
+                            start java -jar C:\\Users\\toma\\Documents\\unir\\wiremock-standalone-3.3.1.jar --port 9090 --root-dir C:\\Users\\toma\\Documents\\unir\\wiremock
+                            SET PYTHONPATH=%WORKSPACE%
+			    timeout 150
+                            pytest --junitxml=result-rest.xml test\\rest
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Results') {
+            steps{
+                junit 'result*.xml'
+            }
+        }
+        
+    }
+}

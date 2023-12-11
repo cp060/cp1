@@ -20,6 +20,10 @@ def InvalidConvertToNumber(operand):  # pragma: no cover
     except ValueError:
         raise TypeError("Operator cannot be converted to number")
 
+#def divide_by_zero(operand):
+#    if operand == 0
+#    return error http 406 
+
 
 def validate_permissions(operation, user):  # pragma: no cover
     print(f"checking permissions of {user} for operation {operation}")

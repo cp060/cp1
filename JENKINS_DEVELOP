@@ -1,0 +1,78 @@
+pipeline {
+    agent none
+    
+    stages {
+        stage('Get Code'){
+            agent { label 'win1' }
+            steps {
+                // get code from repo from develop branch
+                bat 'git clone --branch develop https://github.com/cp060/cp1.git'
+                stash(name: 'myStash')
+            }
+        }
+    
+        stage('Build') {
+            agent{ label 'win1' }
+            steps {
+                echo 'Eip, this is Python mai fren, nothing to comppile!!'
+            }
+        }
+        
+        // create test stages in parallel
+        stage('Run Tests') {
+            parallel {
+                stage('Unit') {
+                    agent{ label 'win1' }
+                    steps {
+                        unstash 'myStash'
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {        
+                            bat '''
+                                SET PYTHONPATH=%WORKSPACE%\\cp1
+                                pytest --junitxml=result-unit.xml cp1\\test\\unit
+                            '''
+                            stash includes: 'result-unit.xml', name:'result-unit.xml'
+                        }
+                    }
+                }
+                
+                stage('Rest'){
+                    agent{ label 'win2' }
+                    steps {
+                        unstash 'myStash'
+                        bat '''
+                            set FLASK_APP=cp1\\app\\api.py
+                            set FLASK_ENV=development
+                            start flask run
+                            start java -jar C:\\Users\\toma\\Documents\\unir\\wiremock-standalone-3.3.1.jar --port 9090 --root-dir C:\\Users\\toma\\Documents\\unir\\wiremock
+                            SET PYTHONPATH=%WORKSPACE%\\cp1
+                            pytest --junitxml=result-rest.xml cp1\\test\\rest
+                        '''
+                        stash includes: 'result-rest.xml', name:'result-rest.xml'
+                    }
+                }
+            }
+        }
+        
+        stage('Results') {
+            agent{ label 'win1' }
+            steps{
+                unstash 'result-unit.xml'
+                unstash 'result-rest.xml'
+                junit 'result*.xml'
+            }
+        }
+    
+        stage('deleteDir_agent1') {
+            agent{ label 'win1' }
+                steps {
+                    deleteDir()
+                }
+        }
+        stage('deleteDir_agent2') {
+            agent{ label 'win2' }
+                steps {
+                    deleteDir()
+                }
+        }
+    }
+}

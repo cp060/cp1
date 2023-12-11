@@ -1,0 +1,110 @@
+pipeline {
+    agent none
+    
+    stages {
+        stage('Get Code'){
+            agent { label 'win1' }
+            steps {
+                // get code from repo
+                bat '''
+                    whoami
+                    hostname
+                '''
+                echo WORKSPACE
+                git 'https://github.com/cp060/cp1.git'
+                stash(name: 'myStash')
+            }
+        }
+    
+        stage('Build') {
+            agent{ label 'win1' }
+            steps {
+                bat '''
+                    whoami
+                    hostname
+                '''
+                echo WORKSPACE
+                echo 'Eip, this is Python mai fren, nothing to comppile!!'
+                echo WORKSPACE
+                bat 'dir'
+            }
+        }
+        
+        // create test stages in parallel
+        stage('Run Tests') {
+            parallel {
+                stage('Unit') {
+                    agent{ label 'win1' }
+                    steps {
+                        bat '''
+                            whoami
+                            hostname
+                        '''
+                        echo WORKSPACE
+                        unstash 'myStash'
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {        
+                            bat '''
+                                SET PYTHONPATH=%WORKSPACE%
+                                pytest --junitxml=result-unit.xml test\\unit
+                            '''
+                            stash includes: 'result-unit.xml', name:'result-unit.xml'
+                        }
+                    }
+                }
+                
+                stage('Rest'){
+                    agent{ label 'win2' }
+                    steps {
+                        bat '''
+                            whoami
+                            hostname
+                        '''
+                        echo WORKSPACE
+                        unstash 'myStash'
+                        bat '''
+                            set FLASK_APP=app\\api.py
+                            set FLASK_ENV=development
+                            start flask run
+                            start java -jar C:\\Users\\toma\\Documents\\unir\\wiremock-standalone-3.3.1.jar --port 9090 --root-dir C:\\Users\\toma\\Documents\\unir\\wiremock
+                            SET PYTHONPATH=%WORKSPACE%
+                            pytest --junitxml=result-rest.xml test\\rest
+                        '''
+                        stash includes: 'result-rest.xml', name:'result-rest.xml'
+                    }
+                }
+            }
+        }
+        
+        stage('Results') {
+            agent{ label 'win1' }
+            steps{
+                bat '''
+                    whoami
+                    hostname
+                '''
+                echo WORKSPACE
+                unstash 'result-unit.xml'
+                unstash 'result-rest.xml'
+                junit 'result*.xml'
+            }
+        }
+    
+        stage('deleteDir_agent1') {
+            agent{ label 'win1' }
+                steps {
+                    bat 'dir *.*' // podríamos separarlo en otro etapa, pero lo dejamos aquí
+                    deleteDir()
+                    bat 'dir *.*' // realmente es para comprobar, una vez la primera ejecución vemos que funciona estas líneas deberían ir fuera
+                }
+        }
+        stage('deleteDir_agent2') {
+            agent{ label 'win2' }
+                steps {
+                    bat 'dir *.*'
+                    deleteDir()
+                    bat 'dir *.*'
+                }
+        }
+        // ... lo ejecutamos tantas veces agentes como haya
+    }
+}

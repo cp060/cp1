@@ -1,0 +1,10 @@
+C:\Users\toma\helloworld\cp1\test\rest\api_test.py:20: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\cp1\test\rest\api_test.py:30: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\develop\test\rest\api_test.py:20: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\develop\test\rest\api_test.py:29: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\develop\test\rest\api_test.py:38: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\develop\test\rest\api_test.py:47: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\feature_fix_racecond\test\rest\api_test.py:20: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\feature_fix_racecond\test\rest\api_test.py:30: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\test\rest\api_test.py:20: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“
+C:\Users\toma\helloworld\test\rest\api_test.py:30: MEDIUM: B310: Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.“

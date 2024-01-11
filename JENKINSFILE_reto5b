@@ -35,6 +35,20 @@ pipeline {
                         junit 'result*.xml'
                     }
                 }
+
+		stage('Rest'){
+            		steps {
+                		bat '''
+                    			set FLASK_APP=cp1\\app\\api.py
+                    			set FLASK_ENV=development
+                    			start flask run                        
+                    			start java -jar C:\\Users\\toma\\Documents\\unir\\wiremock-standalone-3.3.1.jar --port 9090 --root-dir C:\\Users\\toma\\Documents\\unir\\wiremock
+                    			SET PYTHONPATH=%WORKSPACE%\\cp1
+                    			powershell C:\\Users\\toma\\val.ps1
+                    			pytest --junitxml=result-rest.xml cp1\\test\\rest
+                		'''
+            			}
+        	}
                 
                 stage('plugin3(coverage): Cobertura'){
                     agent{ label 'win1' }

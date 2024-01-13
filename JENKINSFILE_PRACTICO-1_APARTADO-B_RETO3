@@ -34,7 +34,8 @@ pipeline {
                             '''
                             junit 'result*.xml'
                         }
-                        stash allowEmpty: true, includes: 'coverage.xml', name: 'coverage'
+                	stash(name: 'coverage')
+                        //stash allowEmpty: true, includes: 'coverage.xml', name: 'coverage'
                     }
                 }
 

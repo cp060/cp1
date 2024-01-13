@@ -5,6 +5,7 @@ pipeline {
         stage('Get Code'){
             agent { label 'win1' }
             steps {
+	    	echo ${WORKSPACE}
                 git 'https://github.com/cp060/cp1.git'
                 stash(name: 'myStash')
             }

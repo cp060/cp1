@@ -34,7 +34,7 @@ pipeline {
         stage('Run Tests') {
             parallel {
                 stage('plugin2(junit): Unit') {
-                    agent{ label 'principal' }
+                    agent{ label 'win1' }
                     steps {
 		    	bat '''
                     		whoami
@@ -83,6 +83,10 @@ pipeline {
                     agent{ label 'win2' }
                     steps {
                         unstash 'coverage'
+			bat '''
+				whoami
+				hostname
+			'''
                 	echo WORKSPACE
                         bat '''
                             coverage xml
@@ -118,12 +122,12 @@ pipeline {
                 }
         }
         
-        stage('cleanWs_principal') {
-            agent{ label 'principal' }
-                steps {
-                    cleanWs()
-                }
-        }
+        //stage('cleanWs_principal') {
+         //   agent{ label 'principal' }
+          //      steps {
+           //         cleanWs()
+            //    }
+       // }
 
         stage('cleanWs_agent1') {
             agent{ label 'win1' }

@@ -49,8 +49,7 @@ pipeline {
                             '''
                             junit 'result*.xml'
                         }
-                	stash(name: 'coverage')
-            }
+                        stash(name: 'coverage')
                     }
                 }
 

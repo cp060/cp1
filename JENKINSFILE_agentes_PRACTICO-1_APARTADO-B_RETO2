@@ -49,7 +49,8 @@ pipeline {
                             '''
                             junit 'result*.xml'
                         }
-                        stash includes: '*.xml', name: 'roni'
+                	stash(name: 'coverage')
+            }
                     }
                 }
 
@@ -96,7 +97,7 @@ pipeline {
         stage('plugin3(coverage): Cobertura'){
             agent{ label 'win1' }
             steps {
-                unstash 'roni'
+                unstash 'coverage'
                 echo WORKSPACE
                 bat '''
                     whoami

@@ -82,12 +82,8 @@ pipeline {
                 stage('plugin3(coverage): Cobertura'){
                     agent{ label 'win2' }
                     steps {
-		    	bat '''
-                    		whoami
-                    		hostname
-                	'''
-                	echo WORKSPACE
                         unstash 'coverage'
+                	echo WORKSPACE
                         bat '''
                             coverage xml
                         '''

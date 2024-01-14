@@ -5,15 +5,24 @@ pipeline {
         stage('Get Code'){
             agent { label 'win1' }
             steps {
-	    	echo WORKSPACE
+	    	 bat '''
+                    whoami
+                    hostname
+                '''
+                echo WORKSPACE
                 git 'https://github.com/cp060/cp1.git'
                 stash(name: 'myStash')
             }
         }
         
         stage('plugin1(flake): Static'){
-            agent { label 'win1' }
+            agent { label 'win2' }
             steps {
+	     	bat '''
+                	whoami
+              		hostname
+                '''
+                echo WORKSPACE
                 unstash 'myStash'
                 bat 'flake8 --format=pylint --exit-zero app >flake8.out'
                 recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')], qualityGates: [[threshold:
@@ -25,8 +34,13 @@ pipeline {
         stage('Run Tests') {
             parallel {
                 stage('plugin2(junit): Unit') {
-                    agent{ label 'win1' }
+                    agent{ label 'principal' }
                     steps {
+		    	bat '''
+                    		whoami
+                   		hostname
+                	'''
+                	echo WORKSPACE
                         unstash 'myStash'
                         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                             bat '''
@@ -44,6 +58,11 @@ pipeline {
 		        stage('Rest'){
 		            agent{ label 'win1' }
             		steps {
+			    bat '''
+                    			whoami
+                    			hostname
+                	    '''
+                	    echo WORKSPACE
             		    unstash 'myStash'
             		    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                 		    bat '''
@@ -61,8 +80,13 @@ pipeline {
         	}
                 
                 stage('plugin3(coverage): Cobertura'){
-                    agent{ label 'win1' }
+                    agent{ label 'win2' }
                     steps {
+		    	bat '''
+                    		whoami
+                    		hostname
+                	'''
+                	echo WORKSPACE
                         unstash 'coverage'
                         bat '''
                             coverage xml
@@ -72,7 +96,7 @@ pipeline {
                 }
         
                 stage('plugin4(bandit): Security'){
-                    agent{ label 'win2' }
+                    agent{ label 'win1' }
                     steps{
                         unstash 'myStash'
                         bat 'bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}, {severity}] {msg}“'
@@ -98,6 +122,13 @@ pipeline {
                 }
         }
         
+        stage('cleanWs_principal') {
+            agent{ label 'principal' }
+                steps {
+                    cleanWs()
+                }
+        }
+
         stage('cleanWs_agent1') {
             agent{ label 'win1' }
                 steps {

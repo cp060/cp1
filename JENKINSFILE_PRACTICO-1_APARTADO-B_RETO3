@@ -5,8 +5,7 @@ pipeline {
         stage('Get Code'){
             agent { label 'win1' }
             steps {
-                // get code from repo
-                git 'https://github.com/cp060/cp1.git'
+		git branch: 'feature_fix_coverage' , url: 'https://github.com/cp060/cp1.git'
                 stash(name: 'myStash')
             }
         }
@@ -22,18 +21,5 @@ pipeline {
                 cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             }
         }
-
-        stage('clean_win1'){
-            agent{ label 'win1' }
-            steps {
-	    	cleanWs()
-		}
-    	}
-        stage('clean_win2'){
-            agent{ label 'win2' }
-            steps {
-	    	cleanWs()
-		}
-    	}
     }
 }

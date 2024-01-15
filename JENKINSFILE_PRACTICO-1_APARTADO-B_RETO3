@@ -22,5 +22,18 @@ pipeline {
                 cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             }
         }
+
+        stage('clean_win1'){
+            agent{ label 'win1' }
+            steps {
+	    	cleanWs()
+		}
+    	}
+        stage('clean_win2'){
+            agent{ label 'win2' }
+            steps {
+	    	cleanWs()
+		}
+    	}
     }
 }

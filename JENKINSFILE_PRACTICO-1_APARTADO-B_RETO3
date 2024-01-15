@@ -3,111 +3,22 @@ pipeline {
     
     stages {
         stage('Get Code'){
-            agent { label 'win1' }
+            agent { label 'win2' }
             steps {
                 git branch: 'feature_fix_coverage', url: 'https://github.com/cp060/cp1.git'
-                stash(name: 'myStash')
+                stash(name: 'coverage')
             }
         }
         
-        stage('plugin1(flake): Static'){
-            agent { label 'win1' }
-            steps {
-                unstash 'myStash'
-                bat 'flake8 --format=pylint --exit-zero app >flake8.out'
-                recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')], qualityGates: [[threshold:
-8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]]
-            }
-        }
-        
-        // create test stages in parallel
-        stage('Run Tests') {
-            parallel {
-                stage('plugin2(junit): Unit') {
-                    agent{ label 'win1' }
-                    steps {
-                        unstash 'myStash'
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                            bat '''
-                                SET PYTHONPATH=%WORKSPACE%
-                                coverage run --branch --source=app --omit=app\\__init__.py,app\\api.py -m pytest --junitxml=result-unit.xml test\\unit
-                            '''
-                            junit 'result*.xml'
-                        }
-                	stash(name: 'coverage')
-                        //stash allowEmpty: true, includes: 'coverage.xml', name: 'coverage'
-                    }
-                }
-
-		        stage('Rest'){
-		            agent{ label 'win1' }
-            		steps {
-            		    unstash 'myStash'
-            		    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                		    bat '''
-                    			set FLASK_APP=app\\api.py
-                    			set FLASK_ENV=development
-                    			start flask run                        
-                    			start java -jar C:\\Users\\toma\\Documents\\unir\\wiremock-standalone-3.3.1.jar --port 9090 --root-dir C:\\Users\\toma\\Documents\\unir\\wiremock
-                    			SET PYTHONPATH=%WORKSPACE%
-                    			powershell %WORKSPACE%\\valp9090.ps1
-                    			pytest --junitxml=result-rest.xml test\\rest
-                    			powershell %WORKSPACE%\\killp9090.ps1
-                		    '''
-            		    }
-            		}
-        	}
-                
-                stage('plugin3(coverage): Cobertura'){
-                    agent{ label 'win1' }
-                    steps {
-                        unstash 'coverage'
-                        bat '''
-                            coverage xml
-                        '''
-                        cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
-                    }
-                }
-        
-                stage('plugin4(bandit): Security'){
-                    agent{ label 'win2' }
-                    steps{
-                        unstash 'myStash'
-                        bat 'bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}, {severity}] {msg}“'
-                        recordIssues tools: [pyLint(name: 'bandit', pattern: 'bandit.out')], qualityGates: [[threshold: 2, type: 'TOTAL', unstable: true], [threshold: 4, type: 'TOTAL', unstable: false]]
-                    }
-                }
-            }
-        }
-        
-        stage('plugin5(jmeter): Performance'){
-            agent{ label 'win2' }
-                steps{
-                    unstash 'myStash'
-                    echo WORKSPACE
-                    bat '''
-                        SET FLASK_APP=app\\api.py
-                        start flask run
-                        powershell %WORKSPACE%\\valp5000.ps1  
-                        C:\\Users\\toma\\Documents\\unir\\apache-jmeter-5.6.3\\bin\\jmeter -n -t test\\jmeter\\reto5.jmx -f -l reto5_unir.jtl
-                    '''
-                    perfReport filterRegex: '', sourceDataFiles: 'reto5_unir.jtl'
-                    bat 'powershell %WORKSPACE%\\killp5000.ps1'
-                }
-        }
-        
-        stage('cleanWs_agent1') {
+        stage('plugin3(coverage): Cobertura'){
             agent{ label 'win1' }
-                steps {
-                    cleanWs()
-                }
-        }
-        
-        stage('cleanWs_agent2') {
-            agent{ label 'win2' }
-                steps {
-                    cleanWs()
-                }
+            steps {
+                unstash 'coverage'
+                bat '''
+                    coverage xml
+                '''
+                cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+            }
         }
     }
 }

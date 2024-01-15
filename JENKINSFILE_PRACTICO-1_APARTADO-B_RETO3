@@ -5,7 +5,7 @@ pipeline {
         stage('Get Code'){
             agent { label 'win2' }
             steps {
-                git branch: 'feature_fix_coverage', url: 'https://github.com/cp060/cp1.git'
+	        git 'https://github.com/cp060/cp1.git'
                 stash(name: 'coverage')
             }
         }

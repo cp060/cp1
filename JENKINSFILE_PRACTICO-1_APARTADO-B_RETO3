@@ -3,18 +3,20 @@ pipeline {
     
     stages {
         stage('Get Code'){
-            agent { label 'win2' }
+            agent { label 'win1' }
             steps {
-	        git 'https://github.com/cp060/cp1.git'
-                stash(name: 'coverage')
+                // get code from repo
+                git 'https://github.com/cp060/cp1.git'
+                stash(name: 'myStash')
             }
         }
-        
+
         stage('plugin3(coverage): Cobertura'){
-            agent{ label 'win1' }
+            agent{ label 'win2' }
             steps {
-                unstash 'coverage'
+                unstash 'myStash'
                 bat '''
+                    coverage run --branch --source=app --omit=app\\__init__.py,app\\api.py -m pytest test\\unit
                     coverage xml
                 '''
                 cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false

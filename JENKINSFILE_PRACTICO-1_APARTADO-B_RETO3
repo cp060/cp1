@@ -11,7 +11,7 @@ pipeline {
         }
 
         stage('plugin3(coverage): Cobertura'){
-            agent{ label 'win2' }
+            agent{ label 'win1' }
             steps {
                 unstash 'myStash'
                 bat '''
@@ -21,5 +21,12 @@ pipeline {
                 cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100, 80, 90', failNoReports: false, failUnhealthy: false, failUnstable: false, lineCoverageTargets: '100, 85, 95', maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             }
         }
+        
+	stage('clenWs'){
+            agent{ label 'win1' }
+            steps {
+               cleanWs()
+	    }
+	}
     }
 }

@@ -1,9 +1,8 @@
 pipeline {
-    agent none
+    agent any
     
     stages {
         stage('Get Code'){
-            agent { label 'win1' }
             steps {
                 git 'https://github.com/cp060/cp1.git'
 		stash(name: 'myStash')
@@ -11,7 +10,6 @@ pipeline {
         }
 
         stage('plugin3(coverage): Cobertura'){
-            agent{ label 'win1' }
             steps {
                 unstash 'myStash'
                 bat '''
@@ -23,7 +21,6 @@ pipeline {
         }
         
 	stage('clenWs'){
-            agent{ label 'win1' }
             steps {
                cleanWs()
 	    }
